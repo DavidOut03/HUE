@@ -38,11 +38,7 @@ const basicURL = "http://" + HUE_BRIDGE_IP + "/api/" + HUE_BRIDGE_USERNAME + "/l
 
    function controlLight(lightID, on) {
     const data = {"on": on}
-
-    axios.put(basicURL + "/" + lightID + "/state", data).then((res) => {
-      // console.log("Status: ", res.status);
-      // console.log("Body: ", res.data);
-    }).catch((err) => {console.log(err)});
+    axios.put(basicURL + "/" + lightID + "/state", data).then((res) => {"Turned light on!"}).catch((err) => {console.log(err)});
   }
 
   function setLightColor(lightID, brightness, saturation, hue) {

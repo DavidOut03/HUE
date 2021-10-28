@@ -1,18 +1,13 @@
-import {useState} from 'react';
+import {useEffect, useState} from 'react';
 import Sidebar from '../components/sidebar'
 import hue from '../scripts/hue';
-
-
-
-function GetLights() {
-   
-}
+import LoadingScreen from "./loading-screen";
 
 
 function Lights() {
-    const [lights, setLights] = useState([{name: "Exapmple", id: "1", on: true}]);
-    hue.getLights().then((light) => {setLights(light);}).catch((err) => {console.log(err); setLights([{name: "Exapmple", id: "1", on: true}]);});
-
+    const [lights, setLights] = useState([]);
+    const [load, setLoading] = useState(false);
+    
     function getLight(id) {
         return lights.find((light) => light.id === id);
     }
@@ -29,8 +24,15 @@ function Lights() {
          event.target.checked = true;
          hue.controlLight(light.id, true);
      }
+
+     hue.getLights().then((light) => {setLights(light);}).catch((err) => {console.log(err); setLights([{name: "Example", id: "1", on: true}]);});
     }
 
+    if(load === true) {
+        return <LoadingScreen/>
+    }
+
+    if(lights != null && Array.isArray(lights) && lights.length > 0) {
      return  (<div className="body">
 
      <Sidebar/>
@@ -63,6 +65,10 @@ function Lights() {
      </div>
      </div>
      ); 
+  } else {
+    hue.getLights().then((light) => {setLights(light);}).catch((err) => { setLoading(true); console.log(err); setLights([{name: "Example", id: "1", on: true}]);});
+    return <LoadingScreen/>
+  }
 }
 
 export default Lights;
