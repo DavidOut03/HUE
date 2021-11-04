@@ -32,7 +32,7 @@ const basicURL = "http://" + HUE_BRIDGE_IP + "/api/" + HUE_BRIDGE_USERNAME + "/l
       }
 
       return lights;
-    } catch (error) { console.log(error) }
+    } catch (error) { return error}
   }
 
 
@@ -47,7 +47,7 @@ const basicURL = "http://" + HUE_BRIDGE_IP + "/api/" + HUE_BRIDGE_USERNAME + "/l
     axios.put(basicURL + "/" + lightID + "/state", data).then((res) => {
       // console.log("Status: ", res.status);
       // console.log("Body: ", res.data);
-    }).catch((err) => {console.log(err)});
+    }).catch((err) => {return err});
   }
 
 

@@ -1,7 +1,7 @@
 import react, { useEffect } from 'react';
 import {useState} from 'react';
 import axios from 'axios';
-import LoadingScreen from './loading-screen';
+import LoadingScreen from '../components/loading-screen';
 import hue from '../scripts/hue';
 
 

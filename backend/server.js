@@ -1,15 +1,20 @@
 // server setup
+const bodyParser = require('body-parser');
 const express = require('express');
 const app = express();
-
-const port = process.env.PORT || 3001;
-app.listen(port, () => {console.log("Server is listening on port: " + port + ".")});
-
 
 // Script imports
 const authentication = require('./scripts/authentication');
 const fileManager = require('./scripts/json_filemanager');
 const settings = require('./scripts/settings');
+
+
+//Setup server
+const port = process.env.PORT || 3001;
+app.listen(port, () => {console.log("Server is listening on port: " + port + ".")});
+app.use(bodyParser.urlencoded({ extended: false }));
+app.use(bodyParser.json());
+
 
 //Generate default files
 if(!fileManager.fileExists("settings", "/data")) {
@@ -25,6 +30,17 @@ if(!fileManager.fileExists("users", "/data")) {
         authentication.createAccount("admin", "admin");
     }
 }
+
+//Setup authentication
+const session = require("express-session");
+app.use(session(
+    {
+        secret: 'secret', 
+        resave: true, 
+        saveUninitialized: true, 
+        cookie: {maxAge: 120000}
+    }
+    ));
 
 //Routes
 app.get("/settings/hue-bridge/", (req, res) => {
@@ -72,3 +88,46 @@ app.get("/account/:username/:password", (req, res) => {
         res.send(authentication.createAccount(req.params.username, req.params.password));
     }
 });
+
+app.post("/login", (req, res) => {
+    const {username, password} = req.body;
+
+
+    if(req.session.isAuthenticated == true) {
+        res.send({"processed": true,"message": "Successfully logged in."});
+        return;
+    }
+
+    if(username == null || password == null || username == undefined || password == undefined) {
+        res.send({"processed": false,"message": "Username or password is not right."});
+        return false;
+    } 
+
+    const user = authentication.getAccountWithPassword(username, password);
+
+    if(user != null) {
+        req.session.isAuthenticated = true;
+        res.send({"processed": true,"message": "Successfully logged in."});
+    }
+});
+
+app.post("/settings", (req, res) => {
+    const {hue_bridge_ip, hue_bridge_user} = req.body;
+
+    if(hue_bridge_ip != null && hue_bridge_ip != undefined && hue_bridge_user != null && hue_bridge_user != undefined) {
+        settings.setHueBridgeUser(hue_bridge_user);
+        settings.setHueBridgeIP(hue_bridge_ip);
+        res.send({"processed": true,"message": "Successfully updated the settings."});
+    } else {
+        res.send({"processed": false,"message": "Data couldn't be updated."});
+    }
+});
+
+
+// if(authentication.getAccountWithPassword(username, password) != null) {
+//     res.send({"processed": true,"message": "Successfully logged in.", "username": username, "password": password});
+//    req.session.cookie.isAuthenticated = true;
+// } else {
+//    res.send({"processed": false,"message": "Username or password is not right."});
+//    return;
+// }

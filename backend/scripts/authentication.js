@@ -1,11 +1,11 @@
 const fileManager = require('./json_filemanager');
 const encrypt = require('./encrypt.js');
 
+
 function Account(username, password) {
     this.username = username;
     this.password = password;
 }
-
 
 exports.getAccount = (username) => {
     if(fileManager.getFileData("users", "/data") === undefined || fileManager.getFileData("users", "/data") == null) {
@@ -18,6 +18,27 @@ exports.getAccount = (username) => {
             return user;
         }
     });
+}
+
+exports.getAccountWithPassword = (username, password) => {
+    if(fileManager.getFileData("users", "/data") === undefined || fileManager.getFileData("users", "/data") == null) {
+        return null; 
+    }
+
+    if(password === undefined || password === null) {
+        return null;
+    } 
+    const data = fileManager.getFileData("users", "/data");
+    return data.find((user) => {
+        if(user.username.toLowerCase() === username.toLowerCase()) {
+           if(user.password === encrypt.encrypt(user.username, password)) {
+            return user;
+           }
+
+           return null;
+        }
+     });
+
 }
 
 exports.getAccounts = () => {
@@ -147,5 +168,19 @@ exports.setPassword = (username, newPassword) => {
 
        fileManager.setFileData("users", "/data", newData);
        return {processed: true, message: "Successfully set the password to: " + newPassword + "."}
+    }
+}
+
+exports.login = (username, password) => {
+    if(this.getAccount(username) != null) {
+        const account = this.getAccount(username);
+        const encryptedPassword = encrypt.encrypt(account.username, password);
+        if(encryptedPassword === account.password) {
+            return {processed: true, message: "Successfully can login."};
+        } else {
+            return {processed: false, message: "Password is wrong."};
+        }
+    } else {
+        return {processed: false, message: "Account couldn't be found."};
     }
 }

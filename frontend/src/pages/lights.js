@@ -1,7 +1,8 @@
 import {useEffect, useState} from 'react';
 import Sidebar from '../components/sidebar'
 import hue from '../scripts/hue';
-import LoadingScreen from "./loading-screen";
+import LoadingScreen from "../components/loading-screen";
+import ErrorMessage from "../components/error-message";
 
 
 function Lights() {
@@ -66,8 +67,12 @@ function Lights() {
      </div>
      ); 
   } else {
-    hue.getLights().then((light) => {setLights(light);}).catch((err) => { setLoading(true); console.log(err); setLights([{name: "Example", id: "1", on: true}]);});
-    return <LoadingScreen/>
+    hue.getLights().then((light) => {setLights(light);})
+        .catch((err) => { 
+            setLoading(true); console.log(err); setLights([{name: "Example", id: "1", on: true}]);
+            return <ErrorMessage title="Error" message={err.message}/>
+        });
+        return <LoadingScreen/>;
   }
 }
 
